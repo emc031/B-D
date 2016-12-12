@@ -9,11 +9,12 @@ CONF="l3296f211b630m0074m037m440-coul.${cfg}"
 
 #light & charm props
 
-LIGHT_PROP_DIR="/lustre5/dc-mcle2/BtoD/3pt-exec/temp/"
+LIGHT_PROP_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/temp/"
 LIGHT_PROP="l3296f211b630m0074m037m440-coul.${cfg}_wallprop_m0.0376_th0.0_t${t0}.binary"
 
-CHARM_PROP_DIR="/lustre5/dc-mcle2/BtoD/3pt-exec/temp/"
-CHARM_PROP="l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${t0}.binary"
+CHARM_PROP_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/temp/"
+CHARM_PROP="l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${t0}"
+CHARM_SMEAR_LABEL=( "l" "g" )
 
 Nspace=32
 NX=$Nspace
@@ -21,17 +22,16 @@ NY=$Nspace
 NZ=$Nspace
 NT=96
 
-Tlist="19 24 29"
+Tlist="14 19 24"
 heavymass=1.91
 charmmass=0.450
 lightmass=0.0376
 u0=0.8525
 
-#charmtwist=1.758 #half of pmax = 3.516
-charmtwist=0
+charmtwist=0.879 #quarter of pmax = 3.516
 
 ####### output #########
-CORR_DIR="/lustre5/dc-mcle2/BtoD/3pt-exec/correlators/set1_th0/"
+CORR_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/correlators/set1_th0.879/"
 
 cat << HERE
 <ThreePointFunction>
@@ -54,11 +54,11 @@ cat << HERE
   <Lz>${NZ}</Lz>
   <Lt>${NT}</Lt>
   <NQuarkSmearings>3</NQuarkSmearings>
-  <NAQuarkSmearings>1</NAQuarkSmearings>
-  <NCombos>3</NCombos>
-  <QuarkCombos>1 2 3</QuarkCombos>
-  <AntiQuarkCombos>1 1 1</AntiQuarkCombos>
-  <ComboNames n="1">l e g</ComboNames>
+  <NAQuarkSmearings>2</NAQuarkSmearings>
+  <NCombos>6</NCombos>
+  <QuarkCombos>1 2 3 1 2 3</QuarkCombos>
+  <AntiQuarkCombos>1 1 1 2 2 2</AntiQuarkCombos>
+  <ComboNames n="1">ll e1l e2l lg e1g e2g</ComboNames>
   <Correlator_dir>${CORR_DIR}</Correlator_dir>
   <GaugeField>
     <Cfg_filename>${CONF}</Cfg_filename>
@@ -150,7 +150,7 @@ cat << HERE
   </QuarkPropagator>
 
   <LightQuarkPropagator Number="1">
-    <Filename>${CHARM_PROP_DIR}${CHARM_PROP}</Filename>
+    <Filename>${CHARM_PROP_DIR}${CHARM_PROP}_${CHARM_SMEAR_LABEL[0]}.binary</Filename>
     <Format>SciDACBinary</Format>
     <Trev>false</Trev>
     <tstart>${t0}</tstart>
@@ -159,6 +159,24 @@ cat << HERE
     <Meson>D</Meson>
     <QuarkSource>loc</QuarkSource>
     <QuarkSourceRadius>0.0</QuarkSourceRadius>
+    <RandomWall>true</RandomWall>
+    <Seed>${cfg}</Seed>
+    <HadronMomentum>0 0 0</HadronMomentum>
+    <SourceMomentum>0 0 0</SourceMomentum>
+    <WriteProp>false</WriteProp>
+    <theta>${charmtwist} ${charmtwist} ${charmtwist}</theta>
+  </LightQuarkPropagator>
+
+  <LightQuarkPropagator Number="2">
+    <Filename>${CHARM_PROP_DIR}${CHARM_PROP}_${CHARM_SMEAR_LABEL[1]}.binary</Filename>
+    <Format>SciDACBinary</Format>
+    <Trev>false</Trev>
+    <tstart>${t0}</tstart>
+    <tlength>6</tlength>
+    <Mass>${charmmass}</Mass>
+    <Meson>D</Meson>
+    <QuarkSource>gauss</QuarkSource>
+    <QuarkSourceRadius>4.0</QuarkSourceRadius>
     <RandomWall>true</RandomWall>
     <Seed>${cfg}</Seed>
     <HadronMomentum>0 0 0</HadronMomentum>

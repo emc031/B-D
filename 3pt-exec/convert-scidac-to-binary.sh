@@ -103,7 +103,7 @@ fi
 
 SCIDAC_DIR=$1
 SCIDAC_FILE=$2
-OUTPUT_DIR=/lustre5/dc-mcle2/BtoD/3pt-exec/temp/
+OUTPUT_DIR=/lustre2/dc-mcle2/BtoD/3pt-exec/temp/
 PROP_FILENAME=${OUTPUT_DIR}${SCIDAC_FILE}.binary
 SOURCE_FILENAME=${OUTPUT_DIR}${SCIDAC_FILE}.source.binary
 

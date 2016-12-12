@@ -6,8 +6,8 @@
 #SBATCH -J charmprop_Dcorr_3ptcorr
 
 #! Output:
-#SBATCH --output=/lustre5/dc-mcle2/BtoD/out_master/submit-%A.out
-#SBATCH --error=/lustre5/dc-mcle2/BtoD/out_master/submit-%A.err
+#SBATCH --output=/lustre2/dc-mcle2/BtoD/out_master/submit-%A.out
+#SBATCH --error=/lustre2/dc-mcle2/BtoD/out_master/submit-%A.err
 
 #! Which project should be charged:
 #!SBATCH -A HPQCD
@@ -19,7 +19,7 @@
 #! Memory
 #SBATCH --mem=MaxMemPerNode
 #! How much wallclock time will be required?
-#SBATCH --time=4:00:00
+#SBATCH --time=10:00:00
 #! What types of email messages do you wish to receive?
 #!SBATCH --mail-type=ALL
 #! mail-type=ALL, FAIL
@@ -37,12 +37,14 @@ cfg=$1
 nsrc=16
 Lt=96
 
-root="/lustre5/dc-mcle2/BtoD/"
-output="/lustre5/dc-mcle2/BtoD/out_master/out-${cfg}.out"
+root="/lustre2/dc-mcle2/BtoD/"
+output="/lustre2/dc-mcle2/BtoD/out_master/out-${cfg}.out"
+
+charmsmears="l g"
 
 ################ milc stuff #################
 
-rootmilc="/lustre5/dc-mcle2/BtoD/milc-exec/"
+rootmilc="/lustre2/dc-mcle2/BtoD/milc-exec/"
 
 run_milc()
 {
@@ -54,8 +56,8 @@ run_milc()
 
 ################# 3pt stuff #################
 
-root3pt="/lustre5/dc-mcle2/BtoD/3pt-exec/"
-temp3pt="/lustre5/dc-mcle2/BtoD/3pt-exec/temp/"
+root3pt="/lustre2/dc-mcle2/BtoD/3pt-exec/"
+temp3pt="/lustre2/dc-mcle2/BtoD/3pt-exec/temp/"
 
 gen_src()
 {
@@ -72,8 +74,10 @@ run_milc_convert()
 {
   local convert="${root3pt}/convert-scidac-to-binary.sh"
   for src in $(gen_src $cfg); do
-        echo "converting charm ${cfg} t${src}" >> $output
-	$convert "/lustre5/dc-mcle2/BtoD/milc-exec/propagators/" "l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}"                                               
+	for smear in $charmsmears; do
+	    echo "converting charm cfg=${cfg} source=t${src} smear=${smear}" >> $output
+	    $convert "/lustre2/dc-mcle2/BtoD/milc-exec/propagators/" "l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}_${smear}"                                       
+	done
         #binary file is saved in 3pt-exec/temp
 
 	echo "copying over light ${cfg} t${src} to ${temp3pt}" >> $output
@@ -102,16 +106,16 @@ run_nrqcd_parallel()
 
 cleanup()
 {
-    charm_dir=/lustre5/dc-mcle2/BtoD/milc-exec/propagators/
-    charm_source_dir=/lustre5/dc-mcle2/BtoD/milc-exec/sources/
+    charm_dir=/lustre2/dc-mcle2/BtoD/milc-exec/propagators_set1/
+    charm_source_dir=/lustre2/dc-mcle2/BtoD/milc-exec/sources_set1/
     for src in $(gen_src $cfg); do
 	echo 'cleaning up' >> $output
 
 	#charm
-	rm "${charm_dir}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}"
-	rm "${charm_source_dir}/l3296f211b630m0074m037m440-coul.${cfg}_t${src}"
-	rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}.binary"
-	rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}.source.binary"
+	rm "${charm_dir}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}*"
+	rm "${charm_source_dir}/l3296f211b630m0074m037m440-coul.${cfg}_t${src}*"
+	rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}*.binary"
+	rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}*.source.binary"
 
 	#light
 	rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_wallprop_m0.0376_th0.0_t${src}"
@@ -211,11 +215,11 @@ echo -e "\nnumtasks=$numtasks, numnodes=$numnodes, mpi_tasks_per_node=$mpi_tasks
 
 echo -e "\nExecuting command:\n==================\n$CMD\n"
 
-run_milc
-run_milc_convert
+#run_milc
+#run_milc_convert
 
 ulimit -s unlimited
 run_nrqcd_parallel
 wait
 
-cleanup
+#cleanup

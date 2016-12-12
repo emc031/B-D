@@ -19,7 +19,7 @@ ny=32
 nz=32
 nt=96
 
-milcroot=/lustre5/dc-mcle2/BtoD/milc-exec/
+milcroot=/lustre2/dc-mcle2/BtoD/milc-exec/
 
 #where stuff comes from
 cfg_dir=/lustre3/cd449/from_rd419/configs/l3296f211b630m0074m037m440-coul-v5/
@@ -32,23 +32,27 @@ lprop_file_split1=l3296f211b630m0074m037m440-coul.
 lprop_file_split2=_wallprop_m0.0376_th0.0_t
 
 #physics
-fpi_mass=( 0.450 0.0376  )
-#twist=1.758 #(half of pmax = 3.516)
-twist=0
+fpi_mass=( 0.450 0.0376 )
+twist=0.879 #(1/4 of pmax = 3.516)
 u0=1.0 #u0 has no effect in HISQ due to reunitirization
 naik_epsilon=( -0.1256 0 )
 sources=16 #keep on 4 during testing, change to 16 when ready
+
+#smearing info
+nsmear=2
+smears=( "identity" "gaussian" )
+radii=( 1.0 4.0 )
+smearlabel=( "l" "g" )
 
 #statistical precision
 error_for_propagator=( 0 1e-8 )
 rel_error_for_propagator=( 2e-14 0 )
 max_cg_iterations=( 1000 1000 )
-#max_cg_iterations=( 50 1000 ) #keep on low during testing phase
 
 #where output goes
 prop_dir=$milcroot/propagators/
-corr_dir=$milcroot/correlators/set1_th0/ 
-source_dir=$milcroot/sources/ 
+corr_dir=$milcroot/correlators/set1_th0.879/ 
+source_dir=$milcroot/sources/
 #location & name of bumph (output from executable) and pbs (output from slurm)
 #are set in submit-slurm-sandybridge.sh
 
@@ -87,8 +91,7 @@ job_id ${jobid}
 EOF
 
 # Iterate over source time slices
-for t0 in $t0list
-do
+for t0 in $t0list; do
 corrfile=${corr_dir}/corrfile.${inlat}_t${t0}
 
 
@@ -116,7 +119,7 @@ number_of_pbp_masses 0
 
 number_of_base_sources 1
 
-# base source 0
+# source 0
 random_color_wall #source type
 subset full
 t0 ${t0}
@@ -124,22 +127,42 @@ ncolor 3
 momentum 0 0 0
 source_label c
 #forget_source #output
-save_serial_scidac_ks_source ${source_dir}/${inlat}_t${t0} #output
+save_serial_scidac_ks_source ${source_dir}/${inlat}_t${t0}_${smearlabel[0]} 
 
 # Description of completed sources
 
-number_of_modified_sources 0
+number_of_modified_sources $((nsmear-1))
 
 EOF
+
+for n in $(seq 1 $((nsmear-1))); do
+
+cat << EOF >> $infile
+
+# source ${n}
+source 0
+${smears[$n]}
+r0 ${radii[$n]}
+op_label ${smearlabel[$n]}
+save_serial_scidac_ks_source ${source_dir}/${inlat}_t${t0}_${smearlabel[$n]} 
+
+EOF
+done
+
 #### Definition of propagators for two sets ######
 
 cat << EOF >> $infile
 
 # Description of propagators
 
-number_of_sets 2
+number_of_sets $((nsmear+1))
 
-# Parameters for set 0 (charm)
+EOF
+
+for n in $(seq 0 $((nsmear-1))); do
+cat << EOF >> $infile
+
+# set ${n} (${smears[$n]} charm)
 
 max_cg_iterations ${max_cg_iterations[0]}
 max_cg_restarts 3
@@ -148,20 +171,25 @@ momentum_twist ${twist} ${twist} ${twist}
 time_bc periodic
 precision 2
 
-source 0
+source ${n}
 number_of_propagators 1
 
-##### propagator 0
+# propagator ${n}
 
 mass ${fpi_mass[0]}
 naik_term_epsilon ${naik_epsilon[0]}
 error_for_propagator ${error_for_propagator[0]}
 rel_error_for_propagator ${rel_error_for_propagator[0]}
-fresh_ksprop #input 
-#forget_ksprop #output 
-save_serial_scidac_ksprop ${prop_dir}/${inlat}_Rwallfull_m${fpi_mass[$m]}_t${t0} #output 
+fresh_ksprop
+#forget_ksprop
+save_serial_scidac_ksprop ${prop_dir}/${inlat}_Rwallfull_m${fpi_mass[$m]}_t${t0}_${smearlabel[$n]} 
 
-# Parameters for set 1 (light)
+EOF
+done
+
+cat << EOF >> $infile
+
+# set ${nsmear} (${smears[0]} light)
 
 max_cg_iterations ${max_cg_iterations[1]}
 max_cg_restarts 3
@@ -173,13 +201,13 @@ precision 2
 source 0
 number_of_propagators 1
 
-##### propagator 1
+# propagator ${nsmear}
 
 mass ${fpi_mass[1]}
 naik_term_epsilon ${naik_epsilon[1]}
 error_for_propagator ${error_for_propagator[1]}
 rel_error_for_propagator ${rel_error_for_propagator[1]}
-reload_serial_ksprop ${lprop_dir}/${lprop_file_split1}${cfg}${lprop_file_split2}${t0} #input
+reload_serial_ksprop ${lprop_dir}/${lprop_file_split1}${cfg}${lprop_file_split2}${t0} 
 #fresh_ksprop #input
 forget_ksprop #output
 
@@ -190,55 +218,84 @@ EOF
 
 cat << EOF >> $infile
 
-number_of_quarks 2
+number_of_quarks $((nsmear*nsmear+1))
 
-propagator 0 #input
-identity #operator acted on input at sink
-op_label l
-forget_ksprop #output
+EOF
 
-propagator 1 #input
+for m in $(seq 0 $((nsmear-1))); do
+    for n in $(seq 0 $((nsmear-1))); do
+
+cat << EOF >> $infile
+# quark $((nsmear*m+n)) ( charm ${smearlabel[$n]} to ${smearlabel[$m]} )
+propagator ${n} 
+${smears[$m]} 
+EOF
+if [ ${smears[$m]} == "gaussian" ]; then
+cat << EOF >> $infile
+r0 ${radii[$m]}
+EOF
+fi
+
+cat << EOF >> $infile
+op_label ${smearlabel[$m]}
+forget_ksprop 
+
+EOF
+done
+done
+
+cat << EOF >> $infile
+
+# quark $((nsmear*nsmear)) ( light ${smearlabel[0]} to ${smearlabel[0]} )
+propagator ${nsmear} 
 identity
-op_label l 
-forget_ksprop #output
-
+op_label ${smearlabel[0]}
+forget_ksprop
 
 EOF
 ###### Specification of Mesons ########
-
-#change number_of_mesons and uncomment below to create
-#correlation function out of the two propagators
-#with a pseudoscalar tie together.
 
 cat << EOF >> $infile
 
 # Description of mesons
 
-number_of_mesons 3
+number_of_mesons $((nsmear*nsmear+2))
 
-# meson 0 (D)
+EOF
+for m in $(seq 0 $((nsmear-1))); do
+    for n in $(seq 0 $((nsmear-1))); do
 
-pair 0 1 #input (quarks)
+cat << EOF >> $infile
+
+# meson $((nsmear*m+n)) (D ${smearlabel[$n]} to ${smearlabel[$m]})
+
+pair $((nsmear*m+n)) $((nsmear*nsmear)) 
 spectrum_request meson
-save_corr_fnal ${corrfile}_D_m${fpi_mass[0]}_m${fpi_mass[1]} #output
+save_corr_fnal ${corrfile}_Ds.${smearlabel[$n]}${smearlabel[$m]}
 r_offset 0 0 0 ${t0}
 number_of_correlators 1
 correlator pi_gold p000  1 * ${wpnorm} pion5  0 0 0 E E E
 
-# meson 1 (pion)
+EOF
+done
+done
 
-pair 1 1 #input (quarks)
+cat << EOF >> $infile
+
+# meson $((nsmear*nsmear)) (Kaon)
+
+pair $((nsmear*nsmear)) $((nsmear*nsmear)) 
 spectrum_request meson
-save_corr_fnal ${corrfile}_pion_m${fpi_mass[1]}_m${fpi_mass[1]} #output
+save_corr_fnal ${corrfile}_kaon.${smearlabel[0]}${smearlabel[0]}
 r_offset 0 0 0 ${t0}
 number_of_correlators 1
 correlator pi_gold p000  1 * ${wpnorm} pion5  0 0 0 E E E
 
-# meson 2 (eta c)
+# meson $((nsmear*nsmear+1)) (eta c)
 
 pair 0 0 #input (quarks)
 spectrum_request meson
-save_corr_fnal ${corrfile}_etac_m${fpi_mass[1]}_m${fpi_mass[1]} #output
+save_corr_fnal ${corrfile}_etac.${smearlabel[0]}${smearlabel[0]} #output
 r_offset 0 0 0 ${t0}
 number_of_correlators 1
 correlator pi_gold p000  1 * ${wpnorm} pion5  0 0 0 E E E
