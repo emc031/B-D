@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#e mclean may 2016
+#e mclean dec 2016
 
 #takes in configuration number from stdin
 #writes an input file for the milc application
@@ -25,6 +25,7 @@ milcroot=/lustre2/dc-mcle2/BtoD/milc-exec/
 cfg_dir=/lustre3/cd449/from_rd419/configs/l3296f211b630m0074m037m440-coul-v5/
 inlat=l3296f211b630m0074m037m440-coul.${cfg} #just the name of the cfg file
 infile_dir=$milcroot/infiles/
+wf_dir=$milcroot/wavefunctions/
 
 #here's one i made earlier- reading in light props to combine with c to make D
 lprop_dir=/lustre2/dc-sant2/fine_lattice/etas_fine_propagators/
@@ -33,16 +34,18 @@ lprop_file_split2=_wallprop_m0.0376_th0.0_t
 
 #physics
 fpi_mass=( 0.450 0.0376 )
-twist=0.879 #(1/4 of pmax = 3.516)
+twist=2.637 #(3/4 of pmax = 3.516)
 u0=1.0 #u0 has no effect in HISQ due to reunitirization
 naik_epsilon=( -0.1256 0 )
 sources=16 #keep on 4 during testing, change to 16 when ready
+lspacing=0.088 #for use in wavefunction smearing
 
 #smearing info
 nsmear=2
-smears=( "identity" "gaussian" )
-radii=( 1.0 4.0 )
-smearlabel=( "l" "g" )
+smears=( "identity" "wavefunction" )
+#wf_files=( "" "${wf_dir}/exp3.425_3296.wf" )
+wf_file="${milcroot}/wavefunctions//exp3.425_3296.wf"
+smearlabel=( "l" "e" )
 
 #statistical precision
 error_for_propagator=( 0 1e-8 )
@@ -51,7 +54,7 @@ max_cg_iterations=( 1000 1000 )
 
 #where output goes
 prop_dir=$milcroot/propagators/
-corr_dir=$milcroot/correlators/set1_th0.879/ 
+corr_dir=$milcroot/correlators/set1_th2.637/ 
 source_dir=$milcroot/sources/
 #location & name of bumph (output from executable) and pbs (output from slurm)
 #are set in submit-slurm-sandybridge.sh
@@ -117,7 +120,7 @@ number_of_pbp_masses 0
 
 # Description of base sources
 
-number_of_base_sources 1
+number_of_base_sources 2
 
 # source 0
 random_color_wall #source type
@@ -129,20 +132,31 @@ source_label c
 #forget_source #output
 save_serial_scidac_ks_source ${source_dir}/${inlat}_t${t0}_${smearlabel[0]} 
 
+# source 1
+vector_field
+subset full
+origin 0 0 0 ${t0}
+load_source ${source_dir}/${inlat}_t${t0}_${smearlabel[0]} 
+ncolor 3
+momentum 0 0 0
+source_label c
+forget_source
+
 # Description of completed sources
 
 number_of_modified_sources $((nsmear-1))
 
 EOF
 
-for n in $(seq 1 $((nsmear-1))); do
+for n in $(seq 1 $((nsmear-1)) ); do
 
 cat << EOF >> $infile
 
-# source ${n}
-source 0
+# source $((n+1))
+source 1
 ${smears[$n]}
-r0 ${radii[$n]}
+load_source ${milcroot}/wavefunctions//exp3.425_3296.wf
+a ${lspacing}
 op_label ${smearlabel[$n]}
 save_serial_scidac_ks_source ${source_dir}/${inlat}_t${t0}_${smearlabel[$n]} 
 
@@ -159,6 +173,9 @@ number_of_sets $((nsmear+1))
 
 EOF
 
+smearnumstring="0 "$(seq 2 $nsmear)
+IFS=' ' read -r -a smearnums <<< "${smearnumstring}"
+
 for n in $(seq 0 $((nsmear-1))); do
 cat << EOF >> $infile
 
@@ -171,7 +188,7 @@ momentum_twist ${twist} ${twist} ${twist}
 time_bc periodic
 precision 2
 
-source ${n}
+source ${smearnums[$n]}
 number_of_propagators 1
 
 # propagator ${n}
@@ -182,7 +199,7 @@ error_for_propagator ${error_for_propagator[0]}
 rel_error_for_propagator ${rel_error_for_propagator[0]}
 fresh_ksprop
 #forget_ksprop
-save_serial_scidac_ksprop ${prop_dir}/${inlat}_Rwallfull_m${fpi_mass[$m]}_t${t0}_${smearlabel[$n]} 
+save_serial_scidac_ksprop ${prop_dir}/${inlat}_Rwallfull_m${fpi_mass[0]}_t${t0}_${smearlabel[$n]} 
 
 EOF
 done
@@ -198,7 +215,7 @@ momentum_twist 0 0 0
 time_bc periodic
 precision 2
 
-source 0
+source 1
 number_of_propagators 1
 
 # propagator ${nsmear}
@@ -230,9 +247,11 @@ cat << EOF >> $infile
 propagator ${n} 
 ${smears[$m]} 
 EOF
-if [ ${smears[$m]} == "gaussian" ]; then
+
+if [ ${smears[$m]} == "wavefunction" ]; then
 cat << EOF >> $infile
-r0 ${radii[$m]}
+load_source ${milcroot}/wavefunctions//exp3.425_3296.wf
+a ${lspacing}
 EOF
 fi
 

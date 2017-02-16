@@ -19,7 +19,7 @@
 #! Memory
 #SBATCH --mem=MaxMemPerNode
 #! How much wallclock time will be required?
-#SBATCH --time=10:00:00
+#SBATCH --time=12:00:00
 #! What types of email messages do you wish to receive?
 #!SBATCH --mail-type=ALL
 #! mail-type=ALL, FAIL
@@ -40,7 +40,7 @@ Lt=96
 root="/lustre2/dc-mcle2/BtoD/"
 output="/lustre2/dc-mcle2/BtoD/out_master/out-${cfg}.out"
 
-charmsmears="l g"
+charmsmears="l e"
 
 ################ milc stuff #################
 
@@ -48,7 +48,7 @@ rootmilc="/lustre2/dc-mcle2/BtoD/milc-exec/"
 
 run_milc()
 {
-    local application="${rootmilc}/ks_spectrum_hisq_7.7.10-a10"
+    local application="${rootmilc}/ks_spectrum_hisq_7.7.11"
     $rootmilc/gen-milc-infiles.sh $cfg
     echo "running ${application} ${cfg}\n" > $output
     mpirun -ppn $mpi_tasks_per_node -np $np $application $rootmilc/infiles/infile-$cfg > $rootmilc/bumph/bumph-$cfg.txt
@@ -106,16 +106,20 @@ run_nrqcd_parallel()
 
 cleanup()
 {
-    charm_dir=/lustre2/dc-mcle2/BtoD/milc-exec/propagators_set1/
-    charm_source_dir=/lustre2/dc-mcle2/BtoD/milc-exec/sources_set1/
+    charm_dir=/lustre2/dc-mcle2/BtoD/milc-exec/propagators/
+    charm_source_dir=/lustre2/dc-mcle2/BtoD/milc-exec/sources/
     for src in $(gen_src $cfg); do
-	echo 'cleaning up' >> $output
+	echo 'cleaning up' >> $output	
 
 	#charm
-	rm "${charm_dir}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}*"
-	rm "${charm_source_dir}/l3296f211b630m0074m037m440-coul.${cfg}_t${src}*"
-	rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}*.binary"
-	rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}*.source.binary"
+	for smear in $charmsmears; do
+	    echo "removing ${charm_dir}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}_${smear}" >> $output
+	    rm "${charm_dir}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}_${smear}"
+	    echo "removing ${charm_source_dir}/l3296f211b630m0074m037m440-coul.${cfg}_t${src}_${smear}" >> $output
+	    rm "${charm_source_dir}/l3296f211b630m0074m037m440-coul.${cfg}_t${src}_${smear}"
+	    rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}_${smear}.binary"
+	    rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}_${smear}.source.binary"
+	done
 
 	#light
 	rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_wallprop_m0.0376_th0.0_t${src}"
@@ -215,11 +219,11 @@ echo -e "\nnumtasks=$numtasks, numnodes=$numnodes, mpi_tasks_per_node=$mpi_tasks
 
 echo -e "\nExecuting command:\n==================\n$CMD\n"
 
-#run_milc
-#run_milc_convert
+run_milc
+run_milc_convert
 
 ulimit -s unlimited
 run_nrqcd_parallel
 wait
 
-#cleanup
+cleanup

@@ -21,7 +21,7 @@
 convert() 
 {
 echo "Converting Scidac propagator file"
-/home/rd419/libSB/qio-2.3.8/bin/lime_unpack ${SCIDAC_DIR}/${SCIDAC_FILE}
+/lustre2/dc-mcle2/bin/lime_unpack ${SCIDAC_DIR}/${SCIDAC_FILE}
 
 FOLDER=${SCIDAC_DIR}/${SCIDAC_FILE}.contents
 echo

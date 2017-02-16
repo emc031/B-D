@@ -14,7 +14,7 @@ LIGHT_PROP="l3296f211b630m0074m037m440-coul.${cfg}_wallprop_m0.0376_th0.0_t${t0}
 
 CHARM_PROP_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/temp/"
 CHARM_PROP="l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${t0}"
-CHARM_SMEAR_LABEL=( "l" "g" )
+CHARM_SMEAR_LABEL=( "l" "e" )
 
 Nspace=32
 NX=$Nspace
@@ -28,10 +28,10 @@ charmmass=0.450
 lightmass=0.0376
 u0=0.8525
 
-charmtwist=0.879 #quarter of pmax = 3.516
+charmtwist=2.637 #3/4 of pmax = 3.516
 
 ####### output #########
-CORR_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/correlators/set1_th0.879/"
+CORR_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/correlators/set1_th2.637/"
 
 cat << HERE
 <ThreePointFunction>
@@ -58,7 +58,7 @@ cat << HERE
   <NCombos>6</NCombos>
   <QuarkCombos>1 2 3 1 2 3</QuarkCombos>
   <AntiQuarkCombos>1 1 1 2 2 2</AntiQuarkCombos>
-  <ComboNames n="1">ll e1l e2l lg e1g e2g</ComboNames>
+  <ComboNames n="1">ll e1l e2l le e1e e2e</ComboNames>
   <Correlator_dir>${CORR_DIR}</Correlator_dir>
   <GaugeField>
     <Cfg_filename>${CONF}</Cfg_filename>
@@ -175,8 +175,8 @@ cat << HERE
     <tlength>6</tlength>
     <Mass>${charmmass}</Mass>
     <Meson>D</Meson>
-    <QuarkSource>gauss</QuarkSource>
-    <QuarkSourceRadius>4.0</QuarkSourceRadius>
+    <QuarkSource>exp</QuarkSource>
+    <QuarkSourceRadius>3.425</QuarkSourceRadius>
     <RandomWall>true</RandomWall>
     <Seed>${cfg}</Seed>
     <HadronMomentum>0 0 0</HadronMomentum>
