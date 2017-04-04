@@ -108,8 +108,8 @@ PROP_FILENAME=${OUTPUT_DIR}${SCIDAC_FILE}.binary
 SOURCE_FILENAME=${OUTPUT_DIR}${SCIDAC_FILE}.source.binary
 
 # Lattice size - for checking file sizes later
-Lx=32
-Lt=96
+Lx=24
+Lt=64
 
 
 # Check the file exists and exit if not

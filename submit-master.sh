@@ -19,7 +19,7 @@
 #! Memory
 #SBATCH --mem=MaxMemPerNode
 #! How much wallclock time will be required?
-#SBATCH --time=12:00:00
+#SBATCH --time=03:00:00
 #! What types of email messages do you wish to receive?
 #!SBATCH --mail-type=ALL
 #! mail-type=ALL, FAIL
@@ -35,13 +35,13 @@
 cfg=$1
 
 nsrc=16
-Lt=96
+Lt=64
 
 root="/lustre2/dc-mcle2/BtoD/"
 output="/lustre2/dc-mcle2/BtoD/out_master/out-${cfg}.out"
 
 charmsmears="l e"
-
+ 
 ################ milc stuff #################
 
 rootmilc="/lustre2/dc-mcle2/BtoD/milc-exec/"
@@ -76,14 +76,14 @@ run_milc_convert()
   for src in $(gen_src $cfg); do
 	for smear in $charmsmears; do
 	    echo "converting charm cfg=${cfg} source=t${src} smear=${smear}" >> $output
-	    $convert "/lustre2/dc-mcle2/BtoD/milc-exec/propagators/" "l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}_${smear}"                                       
+	    $convert "/lustre2/dc-mcle2/BtoD/milc-exec/propagators/" "l2464f211b600m0102m0509m635a-coul.${cfg}_Rwallfull_m0.645_t${src}_${smear}"
 	done
         #binary file is saved in 3pt-exec/temp
 
 	echo "copying over light ${cfg} t${src} to ${temp3pt}" >> $output
-	cp "/lustre2/dc-sant2/fine_lattice/etas_fine_propagators/l3296f211b630m0074m037m440-coul.${cfg}_wallprop_m0.0376_th0.0_t${src}" $temp3pt
+	cp "/home/cd449/scratch/from_jk513/propagators/l2464f211b600m0102m0509m635a-coul/m0.0541/p0/l2464f211b600m0102m0509m635a-coul.${cfg}_wallprop_m0.0541_t${src}" $temp3pt
 	echo "converting light $cfg $tsrc" >> $output
-	$convert $temp3pt "l3296f211b630m0074m037m440-coul.${cfg}_wallprop_m0.0376_th0.0_t${src}"
+	$convert $temp3pt "l2464f211b600m0102m0509m635a-coul.${cfg}_wallprop_m0.0541_t${src}"
 	#binary file saved in 3pt-exec/temp
   done
 }
@@ -113,18 +113,19 @@ cleanup()
 
 	#charm
 	for smear in $charmsmears; do
-	    echo "removing ${charm_dir}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}_${smear}" >> $output
-	    rm "${charm_dir}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}_${smear}"
+	    echo "removing ${charm_dir}/l2464f211b600m0102m0509m635a-coul.${cfg}_Rwallfull_m0.645_t${src}_${smear}" >> $output
+	    rm "${charm_dir}/l2464f211b600m0102m0509m635a-coul.${cfg}_Rwallfull_m0.645_t${src}_${smear}"
 	    echo "removing ${charm_source_dir}/l3296f211b630m0074m037m440-coul.${cfg}_t${src}_${smear}" >> $output
-	    rm "${charm_source_dir}/l3296f211b630m0074m037m440-coul.${cfg}_t${src}_${smear}"
-	    rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}_${smear}.binary"
-	    rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${src}_${smear}.source.binary"
+	    rm "${charm_source_dir}/l2464f211b600m0102m0509m635a-coul.${cfg}_Rwallfull_m0.645_t${src}_${smear}"
+
+	    rm "${temp3pt}/l2464f211b600m0102m0509m635a-coul.${cfg}_Rwallfull_m0.645_t${src}_${smear}.binary"
+	    rm "${temp3pt}/l2464f211b600m0102m0509m635a-coul.${cfg}_Rwallfull_m0.645_t${src}_${smear}.source.binary"
 	done
 
 	#light
-	rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_wallprop_m0.0376_th0.0_t${src}"
-	rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_wallprop_m0.0376_th0.0_t${src}.binary"
-	rm "${temp3pt}/l3296f211b630m0074m037m440-coul.${cfg}_wallprop_m0.0376_th0.0_t${src}.source.binary"
+	rm "${temp3pt}/l2464f211b600m0102m0509m635a-coul.${cfg}_wallprop_m0.0541_t${src}"
+	rm "${temp3pt}/l2464f211b600m0102m0509m635a-coul.${cfg}_wallprop_m0.0541_t${src}.binary"
+	rm "${temp3pt}/l2464f211b600m0102m0509m635a-coul.${cfg}_wallprop_m0.0541_t${src}.source.binary"
     done
 }
 ##

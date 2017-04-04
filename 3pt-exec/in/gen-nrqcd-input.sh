@@ -4,34 +4,39 @@
 cfg=$1
 t0=$2
 
-CONF_DIR="/lustre3/cd449/from_rd419/configs/l3296f211b630m0074m037m440-coul-v5/"
-CONF="l3296f211b630m0074m037m440-coul.${cfg}"
+# params
+
+Nspace=24
+NX=$Nspace
+NY=$Nspace
+NZ=$Nspace
+NT=64
+
+Tlist="9 12 15"
+heavymass=2.66
+charmmass=0.645
+lightmass=0.0541
+u0=0.8341
+
+charmtwist=0.0
+
+#configs
+
+CONF_DIR="/lustre3/cd449/from_rd419/configs/l2464f211b600m0102m0509m635-coul-v5/"
+CONF="l2464f211b600m0102m0509m635a-coul.${cfg}"
 
 #light & charm props
 
 LIGHT_PROP_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/temp/"
-LIGHT_PROP="l3296f211b630m0074m037m440-coul.${cfg}_wallprop_m0.0376_th0.0_t${t0}.binary"
+LIGHT_PROP="l2464f211b600m0102m0509m635a-coul.${cfg}_wallprop_m0.0541_t${t0}.binary"
 
 CHARM_PROP_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/temp/"
-CHARM_PROP="l3296f211b630m0074m037m440-coul.${cfg}_Rwallfull_m0.450_t${t0}"
+CHARM_PROP="l2464f211b600m0102m0509m635a-coul.${cfg}_Rwallfull_m${charmmass}_t${t0}"
 CHARM_SMEAR_LABEL=( "l" "e" )
 
-Nspace=32
-NX=$Nspace
-NY=$Nspace
-NZ=$Nspace
-NT=96
-
-Tlist="14 19 24"
-heavymass=1.91
-charmmass=0.450
-lightmass=0.0376
-u0=0.8525
-
-charmtwist=2.637 #3/4 of pmax = 3.516
 
 ####### output #########
-CORR_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/correlators/set1_th2.637/"
+CORR_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/correlators/set2_th0/"
 
 cat << HERE
 <ThreePointFunction>
@@ -58,7 +63,7 @@ cat << HERE
   <NCombos>6</NCombos>
   <QuarkCombos>1 2 3 1 2 3</QuarkCombos>
   <AntiQuarkCombos>1 1 1 2 2 2</AntiQuarkCombos>
-  <ComboNames n="1">ll e1l e2l le e1e e2e</ComboNames>
+  <ComboNames n="1">ll el gl le ee ge</ComboNames>
   <Correlator_dir>${CORR_DIR}</Correlator_dir>
   <GaugeField>
     <Cfg_filename>${CONF}</Cfg_filename>
@@ -71,10 +76,11 @@ cat << HERE
     <Twist>false</Twist>
     <Theta>0.0 0.0 0.0</Theta>
   </GaugeField>
+
   <QuarkPropagator Number="1">
     <Trev>false</Trev>
     <tstart>${t0}</tstart>
-    <tlength>6</tlength>
+    <tlength>0</tlength>
     <Mass>${heavymass}</Mass>
     <nham>4</nham>
     <c1>1.31</c1>
@@ -100,19 +106,19 @@ cat << HERE
   <QuarkPropagator Number="2">
     <Trev>false</Trev>
     <tstart>${t0}</tstart>
-    <tlength>6</tlength>
+    <tlength>0</tlength>
     <Mass>${heavymass}</Mass>
     <nham>4</nham>
-    <c1>1.21</c1>
+    <c1>1.31</c1>
     <c2>1.0</c2>
     <c3>1.0</c3>
-    <c4>1.16</c4>
-    <c5>1.12</c5>
-    <c6>1.21</c6>
+    <c4>1.20</c4>
+    <c5>1.16</c5>
+    <c6>1.31</c6>
     <d1>None</d1>
     <d2>None</d2>
     <QuarkSource>exp</QuarkSource>
-    <QuarkSourceRadius>3.425</QuarkSourceRadius>
+    <QuarkSourceRadius>2.0</QuarkSourceRadius>
     <generate_random_wall>false</generate_random_wall>
     <QuarkSourceFilename>None</QuarkSourceFilename>
     <RandomWall>true</RandomWall>
@@ -126,19 +132,19 @@ cat << HERE
   <QuarkPropagator Number="3">
     <Trev>false</Trev>
     <tstart>${t0}</tstart>
-    <tlength>6</tlength>
+    <tlength>0</tlength>
     <Mass>${heavymass}</Mass>
     <nham>4</nham>
-    <c1>1.21</c1>
+    <c1>1.31</c1>
     <c2>1.0</c2>
     <c3>1.0</c3>
-    <c4>1.16</c4>
-    <c5>1.12</c5>
-    <c6>1.21</c6>
+    <c4>1.20</c4>
+    <c5>1.16</c5>
+    <c6>1.31</c6>
     <d1>None</d1>
     <d2>None</d2>
     <QuarkSource>exp</QuarkSource>
-    <QuarkSourceRadius>6.85</QuarkSourceRadius>
+    <QuarkSourceRadius>4.0</QuarkSourceRadius>
     <generate_random_wall>false</generate_random_wall>
     <QuarkSourceFilename>None</QuarkSourceFilename>
     <RandomWall>true</RandomWall>
@@ -154,7 +160,7 @@ cat << HERE
     <Format>SciDACBinary</Format>
     <Trev>false</Trev>
     <tstart>${t0}</tstart>
-    <tlength>6</tlength>
+    <tlength>0</tlength>
     <Mass>${charmmass}</Mass>
     <Meson>D</Meson>
     <QuarkSource>loc</QuarkSource>
@@ -172,11 +178,11 @@ cat << HERE
     <Format>SciDACBinary</Format>
     <Trev>false</Trev>
     <tstart>${t0}</tstart>
-    <tlength>6</tlength>
+    <tlength>0</tlength>
     <Mass>${charmmass}</Mass>
     <Meson>D</Meson>
     <QuarkSource>exp</QuarkSource>
-    <QuarkSourceRadius>3.425</QuarkSourceRadius>
+    <QuarkSourceRadius>2</QuarkSourceRadius>
     <RandomWall>true</RandomWall>
     <Seed>${cfg}</Seed>
     <HadronMomentum>0 0 0</HadronMomentum>
@@ -190,7 +196,7 @@ cat << HERE
     <Format>SciDACBinary</Format>
     <Trev>false</Trev>
     <tstart>${t0}</tstart>
-    <tlength>6</tlength>
+    <tlength>0</tlength>
     <Mass>${lightmass}</Mass>
     <Meson>D</Meson>
     <QuarkSource>loc</QuarkSource>

@@ -14,37 +14,36 @@ else
     cfg=$1
 fi
 
-nx=32
-ny=32
-nz=32
-nt=96
+nx=24
+ny=24
+nz=24
+nt=64
 
 milcroot=/lustre2/dc-mcle2/BtoD/milc-exec/
 
 #where stuff comes from
-cfg_dir=/lustre3/cd449/from_rd419/configs/l3296f211b630m0074m037m440-coul-v5/
-inlat=l3296f211b630m0074m037m440-coul.${cfg} #just the name of the cfg file
+cfg_dir=/lustre3/cd449/from_rd419/configs/l2464f211b600m0102m0509m635-coul-v5/
+inlat=l2464f211b600m0102m0509m635a-coul.${cfg} #just the name of the cfg file
 infile_dir=$milcroot/infiles/
 wf_dir=$milcroot/wavefunctions/
 
 #here's one i made earlier- reading in light props to combine with c to make D
-lprop_dir=/lustre2/dc-sant2/fine_lattice/etas_fine_propagators/
-lprop_file_split1=l3296f211b630m0074m037m440-coul.
-lprop_file_split2=_wallprop_m0.0376_th0.0_t
+lprop_dir=/home/cd449/scratch/from_jk513/propagators/l2464f211b600m0102m0509m635a-coul/m0.0541/p0/
+lprop_file_split1=l2464f211b600m0102m0509m635a-coul.
+lprop_file_split2=_wallprop_m0.0541_t
 
 #physics
-fpi_mass=( 0.450 0.0376 )
-twist=2.637 #(3/4 of pmax = 3.516)
+fpi_mass=( 0.645 0.0541 )
+twist=0
 u0=1.0 #u0 has no effect in HISQ due to reunitirization
-naik_epsilon=( -0.1256 0 )
+naik_epsilon=( -0.2939 0 ) #???
 sources=16 #keep on 4 during testing, change to 16 when ready
-lspacing=0.088 #for use in wavefunction smearing
+lspacing=0.122 #for use in wavefunction smearing
 
 #smearing info
 nsmear=2
 smears=( "identity" "wavefunction" )
-#wf_files=( "" "${wf_dir}/exp3.425_3296.wf" )
-wf_file="${milcroot}/wavefunctions//exp3.425_3296.wf"
+wf_file="${milcroot}/wavefunctions/exp2_2464.wf"
 smearlabel=( "l" "e" )
 
 #statistical precision
@@ -54,7 +53,7 @@ max_cg_iterations=( 1000 1000 )
 
 #where output goes
 prop_dir=$milcroot/propagators/
-corr_dir=$milcroot/correlators/set1_th2.637/ 
+corr_dir=$milcroot/correlators/set2_th0/
 source_dir=$milcroot/sources/
 #location & name of bumph (output from executable) and pbs (output from slurm)
 #are set in submit-slurm-sandybridge.sh
@@ -155,7 +154,7 @@ cat << EOF >> $infile
 # source $((n+1))
 source 1
 ${smears[$n]}
-load_source ${milcroot}/wavefunctions//exp3.425_3296.wf
+load_source ${milcroot}/wavefunctions//exp2_2464.wf
 a ${lspacing}
 op_label ${smearlabel[$n]}
 save_serial_scidac_ks_source ${source_dir}/${inlat}_t${t0}_${smearlabel[$n]} 
@@ -250,7 +249,7 @@ EOF
 
 if [ ${smears[$m]} == "wavefunction" ]; then
 cat << EOF >> $infile
-load_source ${milcroot}/wavefunctions//exp3.425_3296.wf
+load_source ${milcroot}/wavefunctions//exp2_2464.wf
 a ${lspacing}
 EOF
 fi
