@@ -77,32 +77,6 @@ cat << HERE
     <tlength>6</tlength>
     <Mass>${heavymass}</Mass>
     <nham>4</nham>
-    <c1>1.31</c1>
-    <c2>1.0</c2>
-    <c3>1.0</c3>
-    <c4>1.20</c4>
-    <c5>1.16</c5>
-    <c6>1.31</c6>
-    <d1>None</d1>
-    <d2>None</d2>
-    <QuarkSource>loc</QuarkSource>
-    <QuarkSourceRadius>0.0</QuarkSourceRadius>
-    <generate_random_wall>false</generate_random_wall>
-    <QuarkSourceFilename>None</QuarkSourceFilename>
-    <RandomWall>true</RandomWall>
-    <Seed>204</Seed>
-    <HadronMomentum>0 0 0</HadronMomentum>
-    <SourceMomentum>0 0 0</SourceMomentum>
-    <WriteProp>false</WriteProp>
-    <Filename>None</Filename>
-  </QuarkPropagator>
-
-  <QuarkPropagator Number="2">
-    <Trev>false</Trev>
-    <tstart>${t0}</tstart>
-    <tlength>6</tlength>
-    <Mass>${heavymass}</Mass>
-    <nham>4</nham>
     <c1>1.21</c1>
     <c2>1.0</c2>
     <c3>1.0</c3>
