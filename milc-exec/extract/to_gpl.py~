@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+# Andrew Lytle, Feb 2015
+
+#e: reads extracted files (path to file name specified in code)
+#takes average over time sources, adds tags, and writes to standard out in 'gpl' format
+
+#'gpl' format = a bunch of lists of correlators from t - tsource = 0 to t - tsource = textent/2 + 1,
+#each such 'list' is separated by a blank line. Each list represents one configuration and one smearing.
+#tags specify the smearing, and lists with the same tag are ordered in configuration. /e
+
+import sys
+import string
+import numpy as np
+
+V=(32**3)
+
+#  PARAMS defines files to be read
+#  ( input file, output file name, nt(tsink-tsource), normalization )
+
+file_tag_assoc = []
+
+def buildFTA(tag):
+    global file_tag_assoc
+    file_tag_assoc =  [ ('out_milc', tag, 96, V*3 ) ]
+
+DFLAG = False  # Current corr files use D to signify exponent.
+NSRC = 16
+
+#  takes in an array ar, breaks into chunks of size 'size' and returns the list of arrays
+def chunks(ar, size):
+    for i in range(0, len(ar), size):
+        yield ar[i:i+size]
+
+
+#  reads in correlator values
+def read_corrs(fname, nt, norm=1):
+    with open(fname, 'r') as f:
+        lines = f.readlines()
+    
+    result = []
+    to_float = lambda s: float(s.strip()) #strip() removes whitespace from string
+    #  lambda is just another way of defining a function, to_float is basically a function
+    if DFLAG:
+        to_float = lambda s: float(string.replace(s.strip(), 'D', 'E')) #replaces all instances of D with E
+    for corr in chunks(lines, nt+1):
+        corr = map(to_float, corr[:-1]) 
+        #  map(,) applies function to_float to every element of corr[] and returns array with results
+        result.append(np.array(corr)/norm) #e .append(a) extends the array by 'adding on' array 'a'
+    
+    return result
+
+
+#  takes average over all 16 sources (returns single value 'average')
+def source_average(corrs, nsrc=NSRC):
+    result = []
+    for chunk in chunks(corrs, nsrc):
+        ave = sum(chunk)/nsrc
+        result.append(ave)
+    return result
+
+#  reads in correlators from files specified in file_tag_assoc, averages over time sources,
+#  and returns array of averages
+def load_corrs(file_tag_assoc):
+    corr_dict = {}
+    #  for a,b,c,d in array ( (A,B,C,D), (A2,B2,C2,D2), ...) sums over little arrays in big array
+    #and identifies the entries of the little array as a,b,c,d
+    for file, tag, nt, norm in file_tag_assoc:
+        corr_dict[tag] = source_average(read_corrs(file, nt, norm))
+    return corr_dict
+
+def to_string(corr):
+    res = ''
+    to_str = lambda x: '{0:.10E}'.format(x)
+    corr = map(to_str, corr)
+    for x in corr:
+        res += x
+        res += ' '*4
+    return res[:-1]
+
+#  writes tagged array of averages into stdout
+def write_gpl(tags, corr_dict):
+    nconf = len(corr_dict.values()[0])
+    maxl = max(map(len, tags))  # For formatting
+    for i in range(nconf):
+        for tag in tags:
+            sys.stdout.write(tag + ' '*(maxl-len(tag)+4))
+            sys.stdout.write(to_string(corr_dict[tag][i]))
+            sys.stdout.write('\n')
+    
+
+def main(argv):
+    buildFTA(argv[0])
+
+    corr_dict = load_corrs(file_tag_assoc)
+    tags = [tag for file, tag, nt, norm in file_tag_assoc]
+    
+    write_gpl(tags, corr_dict)
+
+    return 0
+   
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

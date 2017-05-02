@@ -6,41 +6,42 @@ t0=$2
 
 # params
 
-Nspace=24
+Nspace=16
 NX=$Nspace
 NY=$Nspace
 NZ=$Nspace
-NT=64
+NT=48
 
-Tlist="9 12 15"
-heavymass=2.66
-charmmass=0.645
-lightmass=0.0541
-u0=0.8341
+ntimes=3
+Tlist="8 11 14"
+heavymass=3.297
+charmmass=0.826
+lightmass=0.0705
+u0=0.8195
 
-charmtwist=0.0
+charmtwist=0
 
 #configs
 
-CONF_DIR="/lustre3/cd449/from_rd419/configs/l2464f211b600m0102m0509m635-coul-v5/"
-CONF="l2464f211b600m0102m0509m635a-coul.${cfg}"
+CONF_DIR="/lustre3/cd449/from_rd419/configs/l1648f211b580m013m065m838a-coul-v5/"
+CONF="l1648f211b580m013m065m838a-coul-v5.${cfg}"
 
 #light & charm props
 
 LIGHT_PROP_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/temp/"
-LIGHT_PROP="l2464f211b600m0102m0509m635a-coul.${cfg}_wallprop_m0.0541_t${t0}.binary"
+LIGHT_PROP="l1648f211b580m013m065m838a-coul-v5.${cfg}_wallprop_m0.0705_t${t0}"
 
 CHARM_PROP_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/temp/"
-CHARM_PROP="l2464f211b600m0102m0509m635a-coul.${cfg}_Rwallfull_m${charmmass}_t${t0}"
+CHARM_PROP="l1648f211b580m013m065m838a-coul-v5.${cfg}_Rwallfull_m${charmmass}_t${t0}"
 CHARM_SMEAR_LABEL=( "l" "e" )
 
 
 ####### output #########
-CORR_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/correlators/set2_th0/"
+CORR_DIR="/lustre2/dc-mcle2/BtoD/3pt-exec/correlators/set3_th0/"
 
 cat << HERE
 <ThreePointFunction>
-  <NTIMES>3</NTIMES>
+  <NTIMES>${ntimes}</NTIMES>
   <NMOMpi>1</NMOMpi>
   <NMOMpf>1</NMOMpf>
   <NMOMq>1</NMOMq>
@@ -83,12 +84,12 @@ cat << HERE
     <tlength>0</tlength>
     <Mass>${heavymass}</Mass>
     <nham>4</nham>
-    <c1>1.31</c1>
+    <c1>1.36</c1>
     <c2>1.0</c2>
     <c3>1.0</c3>
-    <c4>1.20</c4>
-    <c5>1.16</c5>
-    <c6>1.31</c6>
+    <c4>1.22</c4>
+    <c5>1.21</c5>
+    <c6>1.36</c6>
     <d1>None</d1>
     <d2>None</d2>
     <QuarkSource>loc</QuarkSource>
@@ -96,7 +97,7 @@ cat << HERE
     <generate_random_wall>false</generate_random_wall>
     <QuarkSourceFilename>None</QuarkSourceFilename>
     <RandomWall>true</RandomWall>
-    <Seed>204</Seed>
+    <Seed>${cfg}</Seed>
     <HadronMomentum>0 0 0</HadronMomentum>
     <SourceMomentum>0 0 0</SourceMomentum>
     <WriteProp>false</WriteProp>
@@ -109,12 +110,12 @@ cat << HERE
     <tlength>0</tlength>
     <Mass>${heavymass}</Mass>
     <nham>4</nham>
-    <c1>1.31</c1>
+    <c1>1.36</c1>
     <c2>1.0</c2>
     <c3>1.0</c3>
-    <c4>1.20</c4>
-    <c5>1.16</c5>
-    <c6>1.31</c6>
+    <c4>1.22</c4>
+    <c5>1.21</c5>
+    <c6>1.36</c6>
     <d1>None</d1>
     <d2>None</d2>
     <QuarkSource>exp</QuarkSource>
@@ -122,7 +123,7 @@ cat << HERE
     <generate_random_wall>false</generate_random_wall>
     <QuarkSourceFilename>None</QuarkSourceFilename>
     <RandomWall>true</RandomWall>
-    <Seed>204</Seed>
+    <Seed>${cfg}</Seed>
     <HadronMomentum>0 0 0</HadronMomentum>
     <SourceMomentum>0 0 0</SourceMomentum>
     <WriteProp>false</WriteProp>
@@ -135,12 +136,12 @@ cat << HERE
     <tlength>0</tlength>
     <Mass>${heavymass}</Mass>
     <nham>4</nham>
-    <c1>1.31</c1>
+    <c1>1.36</c1>
     <c2>1.0</c2>
     <c3>1.0</c3>
-    <c4>1.20</c4>
-    <c5>1.16</c5>
-    <c6>1.31</c6>
+    <c4>1.22</c4>
+    <c5>1.21</c5>
+    <c6>1.36</c6>
     <d1>None</d1>
     <d2>None</d2>
     <QuarkSource>exp</QuarkSource>
@@ -148,7 +149,7 @@ cat << HERE
     <generate_random_wall>false</generate_random_wall>
     <QuarkSourceFilename>None</QuarkSourceFilename>
     <RandomWall>true</RandomWall>
-    <Seed>204</Seed>
+    <Seed>${cfg}</Seed>
     <HadronMomentum>0 0 0</HadronMomentum>
     <SourceMomentum>0 0 0</SourceMomentum>
     <WriteProp>false</WriteProp>
@@ -182,7 +183,7 @@ cat << HERE
     <Mass>${charmmass}</Mass>
     <Meson>D</Meson>
     <QuarkSource>exp</QuarkSource>
-    <QuarkSourceRadius>2</QuarkSourceRadius>
+    <QuarkSourceRadius>2.0</QuarkSourceRadius>
     <RandomWall>true</RandomWall>
     <Seed>${cfg}</Seed>
     <HadronMomentum>0 0 0</HadronMomentum>

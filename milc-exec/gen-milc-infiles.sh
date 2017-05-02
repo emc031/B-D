@@ -14,36 +14,36 @@ else
     cfg=$1
 fi
 
-nx=24
-ny=24
-nz=24
-nt=64
+nx=16
+ny=16
+nz=16
+nt=48
 
 milcroot=/lustre2/dc-mcle2/BtoD/milc-exec/
 
 #where stuff comes from
-cfg_dir=/lustre3/cd449/from_rd419/configs/l2464f211b600m0102m0509m635-coul-v5/
-inlat=l2464f211b600m0102m0509m635a-coul.${cfg} #just the name of the cfg file
+cfg_dir=/lustre3/cd449/from_rd419/configs/l1648f211b580m013m065m838a-coul-v5/
+inlat=l1648f211b580m013m065m838a-coul-v5.${cfg} #just the name of the cfg file
 infile_dir=$milcroot/infiles/
 wf_dir=$milcroot/wavefunctions/
 
 #here's one i made earlier- reading in light props to combine with c to make D
-lprop_dir=/home/cd449/scratch/from_jk513/propagators/l2464f211b600m0102m0509m635a-coul/m0.0541/p0/
-lprop_file_split1=l2464f211b600m0102m0509m635a-coul.
-lprop_file_split2=_wallprop_m0.0541_t
+lprop_dir=/lustre3/cd449/from_jk513/propagators/l1648f211b580m013m065m838a-coul-v5/m0.0705/p0/
+lprop_file_split1=l1648f211b580m013m065m838a-coul-v5.
+lprop_file_split2=_wallprop_m0.0705_t
 
 #physics
-fpi_mass=( 0.645 0.0541 )
-twist=0
+fpi_mass=( 0.826 0.0705 )
+twist=0.0
 u0=1.0 #u0 has no effect in HISQ due to reunitirization
-naik_epsilon=( -0.2939 0 ) #???
+naik_epsilon=( -0.3449 0 )
 sources=16 #keep on 4 during testing, change to 16 when ready
-lspacing=0.122 #for use in wavefunction smearing
+lspacing=0.147 #for use in wavefunction smearing
 
 #smearing info
 nsmear=2
 smears=( "identity" "wavefunction" )
-wf_file="${milcroot}/wavefunctions/exp2_2464.wf"
+wf_file="${milcroot}/wavefunctions/exp2_1648.wf"
 smearlabel=( "l" "e" )
 
 #statistical precision
@@ -53,7 +53,7 @@ max_cg_iterations=( 1000 1000 )
 
 #where output goes
 prop_dir=$milcroot/propagators/
-corr_dir=$milcroot/correlators/set2_th0/
+corr_dir=$milcroot/correlators/set3_th0/
 source_dir=$milcroot/sources/
 #location & name of bumph (output from executable) and pbs (output from slurm)
 #are set in submit-slurm-sandybridge.sh
